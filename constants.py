@@ -6,7 +6,6 @@ Date:    22 April 2022
 Constants and enumerations defined for use by the genetic algorithm.
 """
 from enum import IntEnum, Flag, auto
-from sre_constants import IN
 
 
 class OptimizationType(IntEnum):
@@ -24,6 +23,7 @@ class CrossoverType(IntEnum):
     OX = 0
     PMX = 1
     ERX = 2
+    SPX = 3
 
 
 class MutationType(Flag):
@@ -31,5 +31,5 @@ class MutationType(Flag):
     REVERSE = auto()
     DELETE = auto()
     REPLICATE = auto()
-    REPLACE = auto()
-    ALL = SWAP | REVERSE | DELETE | REPLICATE | REPLACE
+    CUSTOM = auto()
+    ALL = SWAP | REVERSE | DELETE | REPLICATE | CUSTOM

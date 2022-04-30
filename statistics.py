@@ -6,6 +6,7 @@ Date:    23 April 2022
 Collects statistics for the genetic algorithm.
 """
 
+
 class Stats(object):
     def __init__(self):
         # best overall fitness value for entire run of the algorithm
