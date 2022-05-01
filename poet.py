@@ -14,7 +14,7 @@ import random
 import string
 import statistics
 import genalg
-from functools import cmp_to_key
+from os import path
 
 
 def plot_stats(params, stats):
@@ -43,7 +43,7 @@ def plot_stats(params, stats):
         best_fitness,
         (stats.get_best_generation(), best_fitness),
         xytext=(generations / 2, (best_fitnesses[0] + best_fitness) // 2),
-        arrowprops={"width": 1, "shrink": 0.02},
+        arrowprops={"width": 1, "shrink": 0.02, "color": "red"},
     )
     plt.annotate(
         best_fitnesses[0],
@@ -52,7 +52,7 @@ def plot_stats(params, stats):
         arrowprops={"width": 1, "shrink": 0.02},
     )
     d = datetime.date.today().isoformat()
-    plt.savefig("plot" + d + "-" + str(time.time())[5::2] + ".png")
+    plt.savefig(path.join("results", f"plot{d}-{str(time.time())[5::2]}.png"))
 
 
 def generate_population(pop_size, min_length, max_length, bases):
@@ -66,7 +66,7 @@ def run(params=None):
     # generate an initial population
     bases = string.ascii_lowercase
     population = generate_population(
-        params["population_size"] * 10,
+        params["population_size"],
         params["min_length"],
         params["max_length"],
         bases,
@@ -76,7 +76,7 @@ def run(params=None):
         return distance(params["target"], "".join(x))
 
     # key=cmp_to_key(lambda x, y: eval_func(y) - eval_func(x))
-    population = sorted(population, key=eval_func)[: params["population_size"]]
+    # population = sorted(population, key=eval_func)[: params["population_size"]]
 
     def mutate_replace_gene(individual):
         """Replace a random gene with a randomly-chosen item from the available bases."""

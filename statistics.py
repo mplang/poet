@@ -18,14 +18,14 @@ class Stats(object):
         self.best_individuals = []
         # list of average fitness values for each generations
         self.average_fitnesses = []
-        self.count = 0
+        self.convergence_count = 0
 
     def set_best_fitness(self, fitness, individual):
-        # Saves the best standard fitness values.
+        """Saves the best standard fitness values."""
         if len(self.best_fitnesses) > 0 and fitness == self.best_fitnesses[-1]:
-            self.count += 1
+            self.convergence_count += 1
         else:
-            self.count = 0
+            self.convergence_count = 0
         self.best_fitnesses.append(fitness)
         self.best_individuals.append(individual)
         if self.best_fitness is None or fitness < self.best_fitness:
@@ -54,5 +54,5 @@ class Stats(object):
     def get_average_fitnesses(self):
         return self.average_fitnesses
 
-    def get_count(self):
-        return self.count
+    def get_convergence_count(self):
+        return self.convergence_count

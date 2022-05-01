@@ -48,6 +48,10 @@ class Population:
         if self.sum_fitness:
             return self.sum_fitness[-1]
         return None
+    
+    @property
+    def convergence_count(self):
+        return self._stats.get_convergence_count()
 
     def clear_population(self):
         self._population = None
