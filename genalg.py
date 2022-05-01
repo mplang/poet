@@ -1,6 +1,6 @@
 """
 genalg.py
-Authors: Michael P. Lang
+Author: Michael P. Lang
 Date:    23 April 2022
 
 Genetic Algorithm algorithms and utilities.
@@ -8,18 +8,21 @@ Depends on Python3, ProgressBar, and pathos.
 """
 
 
+# standard library modules
 import random
-from progressbar import ProgressBar, Percentage, Bar
-import constants
 import itertools
 import bisect
-from pathos.multiprocessing import ProcessPool
-from population import Population
-from statistics import Stats
 from collections.abc import Collection
 from typing import Callable, Union, Any
 
-Individual = tuple[str, ...]
+# 3rd-party modules
+from pathos.multiprocessing import ProcessPool
+from progressbar import ProgressBar, Percentage, Bar
+
+# custom modules
+import constants
+from population import Population, Individual
+from statistics import Stats
 
 
 class GA:

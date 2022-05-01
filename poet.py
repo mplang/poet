@@ -18,16 +18,16 @@ from os import path
 
 
 def plot_stats(params, stats):
-    best_fitnesses = stats.get_best_fitnesses()
-    best_fitness = stats.get_best_fitness()
-    average_fitnesses = stats.get_average_fitnesses()
+    best_fitness_per_generation = stats._best_fitness_per_generation
+    best_fitness = stats.best_fitness
+    average_fitness_per_generation = stats.average_fitness_per_generation()
     selection_type = params["selection_type"].name.lower()
     crossover_type = params["crossover_type"].name.lower()
     mutation_type = params["mutation_type"].name.lower()
-    generations = len(best_fitnesses)
+    generations = len(best_fitness_per_generation)
 
-    plt.plot(range(generations), best_fitnesses, label="best")
-    plt.plot(range(generations), average_fitnesses, label="average")
+    plt.plot(range(generations), best_fitness_per_generation, label="best")
+    plt.plot(range(generations), average_fitness_per_generation, label="average")
     plt.title(
         "selection: {}, recombination: {}, mutation: {}\n".format(
             selection_type, crossover_type, mutation_type
@@ -42,13 +42,13 @@ def plot_stats(params, stats):
     plt.annotate(
         best_fitness,
         (stats.get_best_generation(), best_fitness),
-        xytext=(generations / 2, (best_fitnesses[0] + best_fitness) // 2),
+        xytext=(generations / 2, (best_fitness_per_generation[0] + best_fitness) // 2),
         arrowprops={"width": 1, "shrink": 0.02, "color": "red"},
     )
     plt.annotate(
-        best_fitnesses[0],
-        (0, best_fitnesses[0]),
-        xytext=(generations / 3, (best_fitnesses[0] + best_fitness) // 1.5),
+        best_fitness_per_generation[0],
+        (0, best_fitness_per_generation[0]),
+        xytext=(generations / 3, (best_fitness_per_generation[0] + best_fitness) // 1.5),
         arrowprops={"width": 1, "shrink": 0.02},
     )
     d = datetime.date.today().isoformat()
@@ -91,18 +91,18 @@ def run(params=None):
     print("Evolving...")
     ga.evolve(display_progress=True)
 
-    best_fitnesses = stats.get_best_fitnesses()
-    # best_individuals = stats.get_best_individuals()
-    print("Competed generations: {}".format(len(best_fitnesses)))
-    print("Best fitness: {}".format(stats.get_best_fitness()))
-    print("Best individual: {}".format(stats.get_best_individual()))
+    best_fitness_per_generation = stats.best_fitness_per_generation
+    # best_individual_per_generation = stats.best_individual_per_generation()
+    print("Competed generations: {}".format(len(best_fitness_per_generation)))
+    print("Best fitness: {}".format(stats.best_fitness))
+    print("Best individual: {}".format(stats.best_individual))
     # if(params['save_images']):
     #     print("Saving images...")
     #     pbar = ProgressBar(widgets=[Percentage(), Bar()],
-    #                        maxval=len(best_fitnesses)).start()
-    #     for i, tour in enumerate(best_individuals):
+    #                        maxval=len(best_fitness_per_generation)).start()
+    #     for i, tour in enumerate(best_individual_per_generation):
     #         save_tour_image(city_coords, tour,
-    #                         best_fitnesses[i],
+    #                         best_fitness_per_generation[i],
     #                         "images/test{}".format(i),
     #                         (params.get_dimensions()))
     #         pbar.update(i + 1)
