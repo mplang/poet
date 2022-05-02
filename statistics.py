@@ -8,7 +8,7 @@ Collects statistics for the genetic algorithm.
 
 
 from typing import Collection, Union
-from population import Individual
+from constants import Individual
 
 
 class Stats:

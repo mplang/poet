@@ -17,35 +17,29 @@ from typing import Callable, Union, Optional
 # custom modules
 from statistics import Stats
 
-Individual = tuple[str, ...]  # typedef representing an population individual
-
 
 class Population:
     """Represents the population for one generation of the genetic algorithm."""
 
     def __init__(
         self,
-        initial_population: Collection[Individual],
-        evaluation_function: Callable[[Individual], Union[int, float]],
+        initial_population: Collection[constants.Individual],
+        evaluation_function: Callable[[constants.Individual], Union[int, float]],
         *,
         stats: Optional[Stats] = None,
-        evaluate_initial: bool = True,
         min_length: Optional[int] = 1,
-        max_length: Optional[int] = inf
+        max_length: Optional[int] = inf,
     ):
         """Initialize the population.
 
         Parameters
         ----------
-        initial_population : Collection[Individual]
+        initial_population : Collection[constants.Individual]
             The initial (generation) 0 population.
-        evaluation_function : Callable[[Individual], Union[int, float]]
+        evaluation_function : Callable[[constants.Individual], Union[int, float]]
              The fitness evaluation function.
         stats : Optional[Stats], optional
              Record-keeping, by default None.
-        evaluate_initial : bool, optional
-             Whether or not to evaluate the initial population during initialization,
-             by default True.
         min_length : Optional[int], optional
             The minimum number of genes an individual may have, by default 1.
         max_length : Optional[int], optional
@@ -59,19 +53,19 @@ class Population:
         self._custom_mutations = []
         self._min_length = min_length if min_length else 1
         self._max_length = max_length if max_length else inf
-        if evaluate_initial:
-            self.evaluate()
+        self.evaluate()
 
     @property
-    def population(self) -> Collection[Individual]:
+    def population(self) -> Collection[constants.Individual]:
         """The current population."""
         return self._population
 
     @population.setter
-    def population(self, population: Collection[Individual]) -> None:
-        self._population = population
+    def population(self, population: Collection[constants.Individual]) -> None:
+        self._population = None
         self._fitness = None
         self._sum_fitness = None
+        self.replace_and_evaluate(population)
 
     @property
     def fitness(self):
@@ -89,7 +83,7 @@ class Population:
 
     @property
     def convergence_count(self):
-        return self._stats.convergence_count()
+        return self._stats.convergence_count
 
     def clear_population(self) -> None:
         """Clears the current population and fitness values. Statistics are not modified."""
@@ -97,16 +91,18 @@ class Population:
         self._fitness = None
         self._sum_fitness = None
 
-    def replace_and_evaluate(self, population: Collection[Individual]) -> None:
+    def replace_and_evaluate(
+        self, population: Collection[constants.Individual]
+    ) -> None:
         """Replace and evaluate the population.
 
         Parameters
         ----------
-        population : Collection[Individual]
+        population : Collection[constants.Individual]
             The new population.
         """
-        self.population = population
-        for individual in self.population:
+        self._population = population
+        for individual in self._population:
             assert type(individual) is tuple
         self.evaluate()
 
@@ -186,17 +182,19 @@ class Population:
         # but the intent is for this method to abstract away that detail.
         return self._get_normalized_fitness()
 
-    def _mutate_locus_swap(self, individual: Individual) -> Individual:
+    def _mutate_locus_swap(
+        self, individual: constants.Individual
+    ) -> constants.Individual:
         """Swap the position of two genes.
 
         Parameters
         ----------
-        individual : Individual
+        individual : constants.Individual
             The individual to mutate.
 
         Returns
         -------
-        Individual
+        constants.Individual
             The mutated individual.
         """
         if len(individual) >= 2:
@@ -207,17 +205,19 @@ class Population:
             individual = tuple(ilist)
         return individual
 
-    def _mutate_reverse_segment(self, individual: Individual) -> Individual:
+    def _mutate_reverse_segment(
+        self, individual: constants.Individual
+    ) -> constants.Individual:
         """Reverse a random, random-length segment in-place.
 
         Parameters
         ----------
-        individual : Individual
+        individual : constants.Individual
             The individual to mutate.
 
         Returns
         -------
-        Individual
+        constants.Individual
             The mutated individual.
         """
         if len(individual) >= 2:
@@ -229,7 +229,9 @@ class Population:
                 return individual[:i] + individual[j - 1 : i - 1 : -1] + individual[j:]
         return individual
 
-    def _mutate_replicate_gene(self, individual: Individual) -> Individual:
+    def _mutate_replicate_gene(
+        self, individual: constants.Individual
+    ) -> constants.Individual:
         """Replicate a single random gene to a random location.
 
         Note
@@ -238,12 +240,12 @@ class Population:
 
         Parameters
         ----------
-        individual : Individual
+        individual : constants.Individual
             The individual to mutate.
 
         Returns
         -------
-        Individual
+        constants.Individual
             The mutated individual.
         """
         if len(individual) < self._max_length:
@@ -252,7 +254,9 @@ class Population:
             individual = individual[:i] + (choice,) + individual[i:]
         return individual
 
-    def _mutate_delete_gene(self, individual: Individual) -> Individual:
+    def _mutate_delete_gene(
+        self, individual: constants.Individual
+    ) -> constants.Individual:
         """Delete a single gene from a random location.
 
         Note
@@ -261,12 +265,12 @@ class Population:
 
         Parameters
         ----------
-        individual : Individual
+        individual : constants.Individual
             The individual to mutate.
 
         Returns
         -------
-        Individual
+        constants.Individual
             The mutated individual.
         """
         if len(individual) > self._min_length:
@@ -283,28 +287,34 @@ class Population:
         raise NotImplementedError()
 
     def add_custom_mutation(
-        self, mutate_function: Callable[[Individual], Individual]
+        self, mutate_function: Callable[[constants.Individual], constants.Individual]
     ) -> None:
         """Add a custom mutation strategy.
 
         Parameters
         ----------
-        mutate_function : Callable[[Individual], Individual]
+        mutate_function : Callable[[constants.Individual], constants.Individual]
             The custom mutation function implementation.
         """
         self._custom_mutations.append(mutate_function)
 
+    def display_stats(self) -> None:
+        """Print current population statistics to the console."""
+        print(
+            f"Best fitness: {self._stats.best_fitness_per_generation[-1]}, Average fitness: {self._stats.average_fitness_per_generation[-1]}"
+        )
+
     def mutate(
         self,
-        individual: Individual,
+        individual: constants.Individual,
         mutation_type: constants.MutationType,
         mutation_rate: float,
-    ) -> Individual:
+    ) -> constants.Individual:
         """Random mutation.
 
         Parameters
         ----------
-        individual : Individual
+        individual : constants.Individual
             The individual to (possibly) mutate.
         mutation_type : constants.MutationType
             The mutation strategy/strategies.
@@ -313,7 +323,7 @@ class Population:
 
         Returns
         -------
-        Individual
+        constants.Individual
             The mutated individual.
         """
         # If multiple mutation types are specified, they will be performed

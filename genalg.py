@@ -21,7 +21,7 @@ from progressbar import ProgressBar, Percentage, Bar
 
 # custom modules
 import constants
-from population import Population, Individual
+from population import Population
 from statistics import Stats
 
 
@@ -30,7 +30,7 @@ class GA:
 
     def __init__(
         self,
-        population: Collection[Individual],
+        population: Collection[constants.Individual],
         eval_func: Callable[[Collection[str]], Union[int, float]],
         params: dict[str, Any],
         stats: Stats,
@@ -39,9 +39,9 @@ class GA:
 
         Parameters
         ----------
-        population : Collection[Individual]
+        population : Collection[constants.Individual]
             The initial population.
-        eval_func : Callable[[Individual], Union[int, float]]
+        eval_func : Callable[[constants.Individual], Union[int, float]]
             The fitness evaluation function.
         params : dict[str, Any]
             Runtime configuration parameters.
@@ -49,6 +49,7 @@ class GA:
             Record-keeping.
         """
         self.params = params
+        self._stats = stats
         self.population = Population(
             population,
             eval_func,
@@ -81,7 +82,7 @@ class GA:
 
     def _get_mating_pool(
         self, pool_size: int, selection_type: constants.SelectionType
-    ) -> Collection[Individual]:
+    ) -> Collection[constants.Individual]:
         """Get the mating pool based on the selection type.
 
         Parameters
@@ -93,7 +94,7 @@ class GA:
 
         Returns
         -------
-        Collection[Individual]
+        Collection[constants.Individual]
             The individuals selected for mating.
 
         Raises
@@ -116,20 +117,20 @@ class GA:
         return mating_pool
 
     def _single_point_crossover(
-        self, parent1: Individual, parent2: Individual
-    ) -> tuple[Individual, Individual]:
+        self, parent1: constants.Individual, parent2: constants.Individual
+    ) -> tuple[constants.Individual, constants.Individual]:
         """Single-point order crossover.
 
         Parameters
         ----------
-        parent1 : Individual
+        parent1 : constants.Individual
             The first parent.
-        parent2 : Individual
+        parent2 : constants.Individual
             The second parent.
 
         Returns
         -------
-        tuple[Individual, Individual]
+        tuple[constants.Individual, constants.Individual]
             The two offspring.
         """
         crossover_point = random.randint(1, min(len(parent1), len(parent2)) - 1)
@@ -138,20 +139,20 @@ class GA:
         return child1, child2
 
     def _crossover_order(
-        self, parent1: Individual, parent2: Individual
-    ) -> tuple[Individual, Individual]:
+        self, parent1: constants.Individual, parent2: constants.Individual
+    ) -> tuple[constants.Individual, constants.Individual]:
         """Two-point order crossover.
 
         Parameters
         ----------
-        parent1 : Individual
+        parent1 : constants.Individual
             The first parent.
-        parent2 : Individual
+        parent2 : constants.Individual
             The second parent.
 
         Returns
         -------
-        tuple[Individual, Individual]
+        tuple[constants.Individual, constants.Individual]
             The two offspring.
         """
         crossover_point1 = random.randint(0, len(parent1) - 1)
@@ -195,20 +196,20 @@ class GA:
         return child1, child2
 
     def _crossover_partially_mapped(
-        self, parent1: Individual, parent2: Individual
-    ) -> tuple[Individual, Individual]:
+        self, parent1: constants.Individual, parent2: constants.Individual
+    ) -> tuple[constants.Individual, constants.Individual]:
         """Partially-mapped crossover.
 
         Parameters
         ----------
-        parent1 : Individual
+        parent1 : constants.Individual
             The first parent.
-        parent2 : Individual
+        parent2 : constants.Individual
             The second parent.
 
         Returns
         -------
-        tuple[Individual, Individual]
+        tuple[constants.Individual, constants.Individual]
             The two offspring.
         """
         crossover_point1 = random.randint(0, len(parent1) - 1)
@@ -259,20 +260,20 @@ class GA:
         return child1, child2
 
     def _crossover_edge_recombination(
-        self, parent1: Individual, parent2: Individual
-    ) -> tuple[Individual, ...]:
+        self, parent1: constants.Individual, parent2: constants.Individual
+    ) -> tuple[constants.Individual, ...]:
         """Edge recombination crossover.
 
         Parameters
         ----------
-        parent1 : Individual
+        parent1 : constants.Individual
             The first parent.
-        parent2 : Individual
+        parent2 : constants.Individual
             The second parent.
 
         Returns
         -------
-        tuple[Individual, ...]
+        tuple[constants.Individual, ...]
             The offspring.
         """
         adj1 = {
@@ -320,20 +321,20 @@ class GA:
         return [child]
 
     def _crossover(
-        self, parent1: Individual, parent2: Individual
-    ) -> tuple[Individual, ...]:
+        self, parent1: constants.Individual, parent2: constants.Individual
+    ) -> tuple[constants.Individual, ...]:
         """Mate two individuals to create offsprint.
 
         Parameters
         ----------
-        parent1 : Individual
+        parent1 : constants.Individual
             The first parent.
-        parent2 : Individual
+        parent2 : constants.Individual
             The second parent.
 
         Returns
         -------
-        tuple[Individual, ...]
+        tuple[constants.Individual, ...]
             The offspring.
         """
         if random.random() > self.params["crossover_rate"]:
@@ -352,7 +353,7 @@ class GA:
             else:
                 return parent1, parent2
 
-    def _fps(self, mating_pool_size: int) -> list[Individual]:
+    def _fps(self, mating_pool_size: int) -> list[constants.Individual]:
         """Generate the mating pool using fitness proportionate selection.
 
         Parameters
@@ -362,8 +363,8 @@ class GA:
 
         Returns
         -------
-        list[Individual]
-            Individuals selected for recombination.
+        list[constants.Individual]
+            constants.Individuals selected for recombination.
         """
         # Conceptially, this operation is akin to spinning a game wheel
         # where each member of the population is represented by a slice
@@ -384,7 +385,7 @@ class GA:
 
         return mating_pool
 
-    def _sus(self, mating_pool_size: int) -> list[Individual]:
+    def _sus(self, mating_pool_size: int) -> list[constants.Individual]:
         """Generate the mating pool using stochastic universal sampling.
 
         Parameters
@@ -394,8 +395,8 @@ class GA:
 
         Returns
         -------
-        list[Individual]
-            Individuals selected for recombination.
+        list[constants.Individual]
+            constants.Individuals selected for recombination.
         """
         mating_pool = []
         p_dist = 1.0 / (mating_pool_size)
@@ -409,7 +410,7 @@ class GA:
 
         return mating_pool
 
-    def _ts(self, mating_pool_size: int) -> list[Individual]:
+    def _ts(self, mating_pool_size: int) -> list[constants.Individual]:
         """Generate the mating pool using tournament selection.
 
         Parameters
@@ -419,8 +420,8 @@ class GA:
 
         Returns
         -------
-        list[Individual]
-            Individuals selected for recombination.
+        list[constants.Individual]
+            constants.Individuals selected for recombination.
         """
         mating_pool = []
         population_size = self.params["population_size"]
@@ -439,18 +440,18 @@ class GA:
 
     def _mate_and_mutate(
         self,
-        parent1: Individual,
-        parent2: Individual,
+        parent1: constants.Individual,
+        parent2: constants.Individual,
         mutation_type: constants.MutationType,
         mutation_rate: float,
-    ) -> list[Individual]:
+    ) -> list[constants.Individual]:
         """Performs recombination of two parents and randomly mutates the children.
 
         Parameters
         ----------
-        parent1 : Individual
+        parent1 : constants.Individual
             The first parent.
-        parent2 : Individual
+        parent2 : constants.Individual
             The second parent.
         mutation_type : constants.MutationType
             The mutation strategy or strategies to apply.
@@ -459,7 +460,7 @@ class GA:
 
         Returns
         -------
-        list[Individual]
+        list[constants.Individual]
             _description_
         """
         return [
@@ -468,14 +469,14 @@ class GA:
         ]
 
     def add_custom_mutation(
-        self, mutate_function: Callable[[Individual], Individual]
+        self, mutate_function: Callable[[constants.Individual], constants.Individual]
     ) -> None:
         """Add a custom mutation function to the available mutation strategies. This function
         will be a candidate for execution when the mutation type is CUSTOM or ALL.
 
         Parameters
         ----------
-        mutate_function : Callable[[Individual], Individual]
+        mutate_function : Callable[[constants.Individual], constants.Individual]
             A function implementing a custom mutation strategy.
         """
         self.population.add_custom_mutation(mutate_function)
@@ -492,10 +493,19 @@ class GA:
         max_generations = self.params["max_generations"]
         mutation_type = self.params["mutation_type"]
         mutation_rate = self.params["mutation_rate"]
-        convergence_termination = self.params["convergence_termination"]
-        convergence_generations = self.params["convergence_generations"]
         mating_pool_size = self._get_mating_pool_size()
         selection_type = self.params["selection_type"]
+        convergence_termination = (
+            self.params["convergence_generations"]
+            if self.params["convergence_termination"]
+            else None
+        )
+        min_generations = self.params["min_generations"]
+        fitness_termination = (
+            self.params["target_fitness"]
+            if self.params["target_fitness_termination"]
+            else None
+        )
 
         if display_progress:
             pbar = ProgressBar(
@@ -505,10 +515,8 @@ class GA:
             pbar = None
 
         for generation in range(max_generations):
-            if convergence_termination:
-                if self.population.convergence_count > convergence_generations:
-                    print(f"Converged in {generation} generations")
-                    break
+            if not display_progress:
+                print(f"Generation {generation}: ", end="")
             mating_pool = self._get_mating_pool(
                 mating_pool_size, selection_type
             )  # selection
@@ -549,6 +557,15 @@ class GA:
                         )
                     )
                 self.population.replace_and_evaluate(population)
+                if not display_progress:
+                    self.population.display_stats()
+            if convergence_termination is not None and generation > min_generations:
+                if self.population.convergence_count > convergence_termination:
+                    print(f"Converged in {generation} generations")
+                    break
+            if fitness_termination is not None and self._stats.best_fitness == fitness_termination:
+                print(f"Target fitness achieved in {generation} generations")
+                break
             if pbar is not None:
                 pbar.update(generation + 1)
         if pbar is not None:

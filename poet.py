@@ -20,7 +20,7 @@ from os import path
 def plot_stats(params, stats):
     best_fitness_per_generation = stats._best_fitness_per_generation
     best_fitness = stats.best_fitness
-    average_fitness_per_generation = stats.average_fitness_per_generation()
+    average_fitness_per_generation = stats.average_fitness_per_generation
     selection_type = params["selection_type"].name.lower()
     crossover_type = params["crossover_type"].name.lower()
     mutation_type = params["mutation_type"].name.lower()
@@ -41,14 +41,17 @@ def plot_stats(params, stats):
     plt.legend()
     plt.annotate(
         best_fitness,
-        (stats.get_best_generation(), best_fitness),
+        (stats.best_generation, best_fitness),
         xytext=(generations / 2, (best_fitness_per_generation[0] + best_fitness) // 2),
         arrowprops={"width": 1, "shrink": 0.02, "color": "red"},
     )
     plt.annotate(
         best_fitness_per_generation[0],
         (0, best_fitness_per_generation[0]),
-        xytext=(generations / 3, (best_fitness_per_generation[0] + best_fitness) // 1.5),
+        xytext=(
+            generations / 3,
+            (best_fitness_per_generation[0] + best_fitness) // 1.5,
+        ),
         arrowprops={"width": 1, "shrink": 0.02},
     )
     d = datetime.date.today().isoformat()
@@ -89,7 +92,7 @@ def run(params=None):
     ga = genalg.GA(population, eval_func, params, stats)
     ga.add_custom_mutation(mutate_replace_gene)
     print("Evolving...")
-    ga.evolve(display_progress=True)
+    ga.evolve(display_progress=(not params["verbose"]))
 
     best_fitness_per_generation = stats.best_fitness_per_generation
     # best_individual_per_generation = stats.best_individual_per_generation()

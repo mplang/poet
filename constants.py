@@ -7,6 +7,8 @@ Constants and enumerations defined for use by the genetic algorithm.
 """
 from enum import IntEnum, Flag, auto
 
+Individual = tuple[str, ...]  # typedef representing a population individual
+
 
 class OptimizationType(IntEnum):
     """Whether to optimize for minimum or maximum fitness values.
